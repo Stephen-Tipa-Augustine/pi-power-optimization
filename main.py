@@ -84,7 +84,8 @@ class PowerOptimizer:
             print('rfkill command found in the system')
         uhubctl = os.system('command -v uhubctl')
         if uhubctl != 0:
-            subprocess.run(['sudo', 'apt-get', 'update', '&&', 'sudo', 'apt-get', 'install libusb-1.0-0-dev', 'uhubctl'])
+            subprocess.run(
+                ['sudo', 'apt-get', 'update', '&&', 'sudo', 'apt-get', 'install libusb-1.0-0-dev', 'uhubctl'])
         return 'Validated'
 
     @staticmethod
@@ -221,9 +222,9 @@ class PowerOptimizer:
         for i in lines:
             if '[pi4]' in i:
                 pi4_index = lines.index(i)
-        if not enable and '\ndtparam = pwr_led_trigger = none' not  in lines:
+        if not enable and '\ndtparam = pwr_led_trigger = none' not in lines:
             lines1 = lines[: pi4_index + 1]
-            lines2 = lines[pi4_index + 1 :]
+            lines2 = lines[pi4_index + 1:]
             # Disable the PWR LED
             lines1.append('\ndtparam = pwr_led_trigger = none')
             lines1.append('\ndtparam = pwr_led_activelow = off')
@@ -252,7 +253,19 @@ class PowerOptimizer:
 
 
 if __name__ == '__main__':
-    # A sample of the kwarge argument for instantiating the PowerOptimizer class
-    kwarg = {'backup_config': True, 'enable_ssh': True, 'enable_hdmi': True, 'enable_wifi': True,
-             'enable_bluetooth': False, 'enable_usb': True, 'enable_onboard_led': True}
-    obj = PowerOptimizer(**kwarg)
+    # A sample of the kwarg argument for instantiating the PowerOptimizer class
+    while True:
+        hdmi = int(input("Hdmi enabler:"))  # 1 for True and 0 for False
+        wifi = int(input("Wifi enabler:"))
+        bluetooth = int(input("Bluetooth enabler:"))
+        usb = int(input("Usb enabler:"))
+        led = int(input("Led enabler:"))
+        cpu_clock = int(input("Cpu clock:"))  # e.g 100
+        gpu_clock = int(input("Gpu clock:"))  # e.g 100
+        ram_clock = int(input("Ram clock:"))  # e.g 100
+        kwarg = {'backup_config': True, 'enable_ssh': True, 'enable_hdmi': hdmi == 1, 'enable_wifi': wifi == 1,
+                 'enable_bluetooth': bluetooth == 1, 'enable_usb': usb == 1, 'enable_onboard_led': led == 1}
+        obj = PowerOptimizer(**kwarg)
+        obj.cpu_clock(clock=cpu_clock)  # 100 - 800
+        obj.gpu_clock(clock=gpu_clock)
+        obj.ram_clock(clock=ram_clock)
