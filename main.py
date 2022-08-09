@@ -26,6 +26,7 @@ class PowerOptimizer:
         self.enable_bluetooth = None
         self.enable_usb = None
         self.enable_onboard_led = None
+        self.enable_ethernet = None
         self.kwarg_processor()
 
         # Validating program requirements
@@ -43,6 +44,7 @@ class PowerOptimizer:
         self.bluetooth_controller(enable=self.enable_bluetooth)
         self.usb_controller(enable=self.enable_usb)
         self.onboard_led(enable=self.enable_onboard_led)
+        self.ethernet_port(enable=self.enable_ethernet)
 
     def kwarg_processor(self):
         """
@@ -65,6 +67,8 @@ class PowerOptimizer:
                 self.enable_usb = value
             elif key == 'enable_onboard_led':
                 self.enable_onboard_led = value
+            elif key == 'enable_ethernet':
+                self.enable_ethernet = value
 
     @staticmethod
     def validate_requirements():
@@ -75,10 +79,12 @@ class PowerOptimizer:
         """
         rfkill = os.system('command -v rfkill')
         if rfkill != 0:
-            print('rfkill command not found in the system')
             subprocess.run(['sudo', 'apt-get', 'update', '&&', 'sudo', 'apt-get', 'install', 'rfkill'])
         else:
             print('rfkill command found in the system')
+        uhubctl = os.system('command -v uhubctl')
+        if uhubctl != 0:
+            subprocess.run(['sudo', 'apt-get', 'update', '&&', 'sudo', 'apt-get', 'install libusb-1.0-0-dev', 'uhubctl'])
         return 'Validated'
 
     @staticmethod
@@ -155,6 +161,13 @@ class PowerOptimizer:
         self.edit_config_file(clock, 'arm_freq_max', reset)
 
     @staticmethod
+    def ethernet_port(enable=True):
+        if enable:
+            subprocess.run(['sudo', 'ifconfig', 'eth0', 'up'])
+        else:
+            subprocess.run(['sudo', 'ifconfig', 'eth0', 'down'])
+
+    @staticmethod
     def bluetooth_controller(enable=True):
         """
         Enables or disables the bluetooth controller.
@@ -181,17 +194,18 @@ class PowerOptimizer:
         return wifi.returncode
 
     @staticmethod
-    def usb_controller(enable=True):
+    def usb_controller(enable=True, ports=(1, 2, 3, 4)):
         """
         Enables or disables the usb controller.
         :param enable: boolean
         :return: int
         """
         if enable:
-            usb = subprocess.run(['echo', "'1-1'", '|sudo', 'tee', '/sys/bus/usb/drivers/usb/bind'])
+            for i in ports:
+                subprocess.run(['sudo', 'uhubctl', '-a', 'on', '-p', f'{i}'])
         else:
-            usb = subprocess.run(['echo', "'1-1'", '|sudo', 'tee', '/sys/bus/usb/drivers/usb/unbind'])
-        return usb.returncode
+            for i in ports:
+                subprocess.run(['sudo', 'uhubctl', '-a', 'off', '-p', f'{i}'])
 
     @staticmethod
     def onboard_led(enable=True):
@@ -240,5 +254,5 @@ class PowerOptimizer:
 if __name__ == '__main__':
     # A sample of the kwarge argument for instantiating the PowerOptimizer class
     kwarg = {'backup_config': True, 'enable_ssh': True, 'enable_hdmi': True, 'enable_wifi': True,
-             'enable_bluetooth': False, 'enable_usb': True, 'enable_onboard_led': False}
+             'enable_bluetooth': False, 'enable_usb': True, 'enable_onboard_led': True}
     obj = PowerOptimizer(**kwarg)
