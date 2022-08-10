@@ -39,8 +39,8 @@ class PowerOptimizer:
         if self.enable_ssh:
             self.setup_ssh_at_boot()
 
-        # self.hdmi_controller(enable=self.enable_hdmi)
-        # self.wifi_controller(enable=self.enable_wifi)
+        self.hdmi_controller(enable=self.enable_hdmi)
+        self.wifi_controller(enable=self.enable_wifi)
         self.bluetooth_controller(enable=self.enable_bluetooth)
         self.usb_controller(enable=self.enable_usb)
         self.onboard_led(enable=self.enable_onboard_led)
@@ -195,18 +195,16 @@ class PowerOptimizer:
         return wifi.returncode
 
     @staticmethod
-    def usb_controller(enable=True, ports=(1, 2, 3, 4)):
+    def usb_controller(enable=True):
         """
         Enables or disables the usb controller.
         :param enable: boolean
         :return: int
         """
         if enable:
-            for i in ports:
-                subprocess.run(['sudo', 'uhubctl', '-a', 'on', '-p', f'{i}'])
+            subprocess.run(['sudo', 'uhubctl', '-a', 'on'])
         else:
-            for i in ports:
-                subprocess.run(['sudo', 'uhubctl', '-a', 'off', '-p', f'{i}'])
+            subprocess.run(['sudo', 'uhubctl', '-a', 'off'])
 
     @staticmethod
     def onboard_led(enable=True):
