@@ -214,40 +214,12 @@ class PowerOptimizer:
         :param enable: boolean
         :return: None
         """
-        file_obj = open('/boot/config.txt', 'r')
-        lines = file_obj.readlines()
-        pi4_index = len(lines) - 1
-        for i in lines:
-            if '[pi4]' in i:
-                pi4_index = lines.index(i)
-        if not enable and '\ndtparam = pwr_led_trigger = none' not in lines:
-            lines1 = lines[: pi4_index + 1]
-            lines2 = lines[pi4_index + 1:]
-            # Disable the PWR LED
-            lines1.append('\ndtparam = pwr_led_trigger = none')
-            lines1.append('\ndtparam = pwr_led_activelow = off')
-            # Disable the Activity LED
-            lines1.append('\ndtparam = act_led_trigger = none')
-            lines1.append('\ndtparam = act_led_activelow = off')
-            # Disable ethernet port LEDs
-            lines1.append('\ndtparam = eth_led0 = 4')
-            lines1.append('\ndtparam = eth_led1 = 4')
-
-            lines = lines1 + lines2
-
-            file_obj = open('/boot/config.txt', 'w')
-            file_obj.writelines(lines)
-            file_obj.close()
-        elif enable and '\ndtparam = pwr_led_trigger = none' in lines:
-            # Enable the PWR LED
-            lines.remove('\ndtparam = pwr_led_trigger = none')
-            lines.remove('\ndtparam = pwr_led_activelow = off')
-            # Enable the Activity LED
-            lines.remove('\ndtparam = act_led_trigger = none')
-            lines.remove('\ndtparam = act_led_activelow = off')
-            # Enable ethernet port LEDs
-            lines.remove('\ndtparam = eth_led0 = 4')
-            lines.remove('\ndtparam = eth_led1 = 4')
+        if enable:
+            subprocess.run(['echo', '1', '|','sudo','tee', '/sys/class/leds/PWR/brightness', '>','/dev/null', '&&',
+                            'echo', '1', '|', 'sudo', 'tee', '/sys/class/leds/ACT/brightness', '>', '/dev/null'])
+        else:
+            subprocess.run(['echo', '0', '|', 'sudo', 'tee', '/sys/class/leds/PWR/brightness', '>', '/dev/null', '&&',
+                            'echo', '0', '|', 'sudo', 'tee', '/sys/class/leds/ACT/brightness', '>', '/dev/null'])
 
 
 if __name__ == '__main__':
