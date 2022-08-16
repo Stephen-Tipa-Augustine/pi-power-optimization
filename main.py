@@ -215,11 +215,11 @@ class PowerOptimizer:
         :return: None
         """
         if enable:
-            subprocess.run(['echo', '1', '|','sudo','tee', '/sys/class/leds/PWR/brightness', '>','/dev/null', '&&',
-                            'echo', '1', '|', 'sudo', 'tee', '/sys/class/leds/ACT/brightness', '>', '/dev/null'])
+            subprocess.run(['echo', '1', '|','sudo','tee', '/sys/class/leds/led0/brightness', '>','/dev/null', '&&',
+                            'echo', '1', '|', 'sudo', 'tee', '/sys/class/leds/led1/brightness', '>', '/dev/null'])
         else:
-            subprocess.run(['echo', '0', '|', 'sudo', 'tee', '/sys/class/leds/PWR/brightness', '>', '/dev/null', '&&',
-                            'echo', '0', '|', 'sudo', 'tee', '/sys/class/leds/ACT/brightness', '>', '/dev/null'])
+            subprocess.run(['echo', '0', '|', 'sudo', 'tee', '/sys/class/leds/led0/brightness', '>', '/dev/null', '&&',
+                            'echo', '0', '|', 'sudo', 'tee', '/sys/class/leds/led1/brightness', '>', '/dev/null'])
 
 
 if __name__ == '__main__':
